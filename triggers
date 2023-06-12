@@ -1,0 +1,50 @@
+[21:06, 6/11/2023] Qaiser FAST: create trigger c_insert
+on creaters
+instead of Insert
+as Begin
+	declare @cid int, @fname nvarchar(100), @lname nvarchar(100), @city nvarchar(100), @contact nvarchar(100), 
+	@email nvarchar(100), @c_t_id int = null
+
+	Select @cid = c_id, @fname = f_name, @lname = l_name, @city = city, @contact = contact, @email = email, @c_t_id = c_trainer_id From inserted
+	
+	if @fname = @lname
+	Begin
+		Print 'Unsuccessful Insert'
+	ENd
+
+	Else
+	Begin
+		Insert into creaters VAlues(@cid, @fname, @lname, @city, @contact, @email, @c_t_id)
+		Print 'Successful Insert'
+	ENd
+End
+
+
+
+
+
+
+
+
+
+
+CREATE TRIGGER Cour_Sem_trig ON Courses_Semester
+INSTEAD OF delete
+AS BEGIN
+    IF (EXISTS(SELECT * FROM deleted as d WHERE d.AvailableSeats < 10))
+    BEGIN
+		print'Not Possible'
+    END
+
+    Else
+    BEGIN
+        DECLARE @msg NVARCHAR(100);
+        SELECT @msg = CONCAT('Successfully deleted course semester with ID ', InstructorID, '-', CourseID, '-', Semester)
+        FROM deleted;
+        RAISERROR(@msg, 0, 1) WITH NOWAIT;
+        DELETE cs FROM Courses_Semester cs JOIN deleted d ON 
+		     (cs.InstructorID = d.InstructorID AND cs.CourseID = d.CourseID AND cs.Semester = d.Semester)
+    END
+END
+
+delete from Courses_Semester where InstructorID = 100 and CourseID = 10
