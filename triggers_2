@@ -1,0 +1,305 @@
+--Student(roll_no, name, dept_id, batch)
+--Course(course_id, name, credit_hrs, dept_id)
+--Section (section_id, course_id, capacity)
+--Enrolled(student_roll_no, section_id)
+--Faculty(faculty_id, name, dept_id)
+--Department(dept_id, name)
+
+create database lab10
+use lab10
+
+CREATE TABLE Student (
+  roll_no INT PRIMARY KEY,
+  name VARCHAR(50),
+  dept_id INT,
+  batch INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE Course (
+  course_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  credit_hrs INT,
+  dept_id INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE Section (
+  section_id INT PRIMARY KEY,
+  course_id INT,
+  capacity INT,
+  FOREIGN KEY (course_id) REFERENCES Course(course_id)
+);
+
+CREATE TABLE Enrolled (
+  student_roll_no INT,
+  section_id INT,
+  PRIMARY KEY (student_roll_no, section_id),
+  FOREIGN KEY (student_roll_no) REFERENCES Student(roll_no),
+  FOREIGN KEY (section_id) REFERENCES Section(section_id)
+);
+
+CREATE TABLE Faculty (
+  faculty_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  dept_id INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE Department (
+  dept_id INT PRIMARY KEY,
+  name VARCHAR(50)
+);
+
+
+INSERT INTO Department (dept_id, name) VALUES
+(1, 'Computer Science'),
+(2, 'Electrical Engineering'),
+(3, 'Mechanical Engineering');
+
+INSERT INTO Student (roll_no, name, dept_id, batch) VALUES
+(1001, 'John Smith', 1, 2020),
+(1002, 'Jane Doe', 2, 2021),
+(1003, 'Bob Johnson', 1, 2019),
+(1004, 'Alice Kim', 3, 2022);
+
+INSERT INTO Course (course_id, name, credit_hrs, dept_id) VALUES
+(101, 'Introduction to Computer Science', 3, 1),
+(102, 'Database Management Systems', 4, 1),
+(103, 'Data Structures and Algorithms', 4, 2),
+(104, 'Operating Systems', 3, 3);
+
+INSERT INTO Section (section_id, course_id, capacity) VALUES
+(1, 101, 50),
+(2, 102, 40),
+(3, 103, 60),
+(4, 104, 30);
+
+INSERT INTO Enrolled (student_roll_no, section_id) VALUES
+(1001, 1),
+(1002, 1),
+(1001, 2),
+(1003, 3),
+(1004, 4);
+
+INSERT INTO Faculty (faculty_id, name, dept_id) VALUES
+(1, 'Dr. John Lee', 1),
+(2, 'Dr. Sarah Smith', 2),
+(3, 'Dr. David Kim', 3);
+
+--/////////////////////////////////////////////
+select* from Student
+select* from Course
+select* from Section 
+select* from Enrolled
+select* from Faculty
+select* from Department
+select* from Auditing
+
+--/////////////////////////////////////////////////////////
+
+--///////////////////////5////////////////////////////////
+create trigger dept_change on Department
+instead of delete 
+as begin
+print'You cannot delete'
+end
+go
+
+create trigger dept_change_ins on Department
+instead of insert 
+as begin
+print'You cannot insert'
+end
+go
+create trigger dept_change_up on Department
+instead of update 
+as begin
+print'You cannot update'
+end
+go
+
+
+--///////////////////////4////////////////////////////////
+
+CREATE PROCEDURE GetEnrollmentInfo
+AS
+BEGIN
+    SELECT * FROM enrollment_info
+END
+
+--///////////////////////3////////////////////////////////
+
+CREATE VIEW enrollment_info AS
+SELECT s.section_id, s.capacity, c.name, c.course_id
+FROM Section s
+INNER JOIN Course c ON s.course_id = c.course_id;
+
+SELECT * FROM enrollment_info;
+
+--///////////////////////2////////////////////////////////
+
+drop table Auditing
+
+ALTER TABLE Auditing ADD description VARCHAR(50);
+
+
+INSERT INTO Student (roll_no, name, dept_id, batch) VALUES
+(1015, 'gaba1 Smithxxss', 2, 2020)
+
+
+
+ALTER TRIGGER audit_student_insert
+ON Student
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Student');
+END;
+
+ALTER TRIGGER audit_student_update
+ON Student
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Student');
+END;
+
+ALTER TRIGGER audit_student_delete
+ON Student
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Student');
+END;
+
+ALTER TRIGGER audit_department_insert
+ON Department
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Department');
+END;
+
+ALTER TRIGGER audit_department_update
+ON Department
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Department');
+END;
+
+ALTER TRIGGER audit_department_delete
+ON Department
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Department');
+END;
+
+ALTER TRIGGER audit_faculty_insert
+ON Faculty
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Faculty');
+END;
+
+ALTER TRIGGER audit_faculty_update
+ON Faculty
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Faculty');
+END;
+
+ALTER TRIGGER audit_faculty_delete
+ON Faculty
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on, [Description]) VALUES (GETDATE(), 'Faculty');
+END;
+
+--///////////////////////1////////////////////////////////
+
+
+INSERT INTO Student (roll_no, name, dept_id, batch) VALUES
+(1014, 'gaba1 Smithss', 2, 2020)
+
+CREATE TABLE Auditing (
+  audit_id INT PRIMARY KEY identity,
+  Last_change_on DATETIME NOT NULL
+);
+
+CREATE TRIGGER audit_student_insert
+ON Student
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_student_update
+ON Student
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_student_delete
+ON Student
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_department_insert
+ON Department
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_department_update
+ON Department
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_department_delete
+ON Department
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_faculty_insert
+ON Faculty
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_faculty_update
+ON Faculty
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
+
+CREATE TRIGGER audit_faculty_delete
+ON Faculty
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO Auditing(Last_change_on) VALUES (GETDATE());
+END;
