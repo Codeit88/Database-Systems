@@ -1,4 +1,22 @@
-[21:06, 6/11/2023] Qaiser FAST: create trigger c_insert
+create trigger safety on database for drop table,alter table as print() rollback
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create trigger c_insert
 on creaters
 instead of Insert
 as Begin
